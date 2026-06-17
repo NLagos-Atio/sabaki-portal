@@ -1,0 +1,1 @@
+﻿ALTER TABLE "Cotizacion" ADD COLUMN "mostrarIva" BOOLEAN NOT NULL DEFAULT true;

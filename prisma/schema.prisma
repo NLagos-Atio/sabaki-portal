@@ -1,0 +1,215 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("user")
+  cargo     String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cotizaciones        Cotizacion[]
+  cotizacionesSimples CotizacionSimple[]
+}
+
+model CompanyProfile {
+  id              String   @id @default(cuid())
+  slot            Int      @unique // 1 o 2 — perfil de empresa emisora
+  nombre          String
+  cuit            String
+  condicionIva    String
+  direccion       String
+  contactoNombre  String
+  contactoCargo   String
+  logoPath        String?
+  colorPrimario   String   @default("#1B2A4A")
+  colorSecundario String   @default("#2E86AB")
+  notasDefault             String?
+  condicionesSimpleDefault String?
+  updatedAt                DateTime @updatedAt
+}
+
+model Producto {
+  id                    String    @id @default(cuid())
+  nombre                String
+  descripcion           String?
+  fabricante            String?
+  precioUsd             Float
+  precioUsdFabricante   Float?
+  numeroParte           String?
+  ultimaActPrecio       DateTime?
+  categoria             String
+  activo                Boolean   @default(true)
+  updatedByNombre       String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model Cotizacion {
+  id              String   @id @default(cuid())
+  numero          String   @unique
+  fecha           DateTime @default(now())
+  validezDias     Int      @default(30)
+  moneda          String   @default("USD")
+  tipoCambio      Float?
+  estado          String   @default("borrador")
+
+  clienteEmpresa  String
+  clienteCuit     String?
+  clienteContacto String?
+  clienteCargo    String?
+  clienteTelefono String?
+
+  contactoNombre String?
+  contactoCargo  String?
+
+  alcance          String?
+  alcanceProyecto  String?
+  introduccion     String?
+  sitios           String?
+  condiciones      String?
+
+  margen      Float   @default(0)
+  iva         Float   @default(21)
+  mostrarIva  Boolean @default(true)
+  profileSlot Int     @default(1)
+
+  totalOnetimeUsd     Float   @default(0)
+  totalRecurrenteUsd  Float   @default(0)
+  presupuestoOrigenId String?
+
+  items  CotizacionItem[]
+  tasas  CotizacionTasa[]
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CotizacionItem {
+  id           String     @id @default(cuid())
+  cotizacionId String
+  cotizacion   Cotizacion @relation(fields: [cotizacionId], references: [id], onDelete: Cascade)
+
+  descripcion String
+  numeroParte String?
+  fabricante  String?
+  cantidad    Float
+  precioUsd   Float
+  costoUsd    Float?
+  margenPct   Float?
+  subtotalUsd Float
+  tipo        String @default("onetime")
+  orden       Int    @default(0)
+}
+
+model Proveedor {
+  id           String                 @id @default(cuid())
+  nombre       String
+  pais         String?
+  contacto     String?
+  email        String?
+  telefono     String?
+  notas        String?
+  activo       Boolean                @default(true)
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  presupuestos PresupuestoProveedor[]
+}
+
+model PresupuestoProveedor {
+  id              String    @id @default(cuid())
+  proveedorId     String
+  proveedor       Proveedor @relation(fields: [proveedorId], references: [id], onDelete: Cascade)
+  numeroQuote     String?
+  fechaDoc        DateTime?
+  validezOferta   DateTime?
+  moneda          String?
+  incoterm        String?
+  condPago        String?
+  impuestos       String?
+  descuentos      String?
+  subtotal        Float?
+  totalFinal      Float?
+  cargosJson      String?
+  itemsJson       String?
+  analisisRaw     String?
+  nombreArchivo   String
+  rutaArchivo     String
+  procesado       Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model CotizacionTasa {
+  id           String     @id @default(cuid())
+  cotizacionId String
+  cotizacion   Cotizacion @relation(fields: [cotizacionId], references: [id], onDelete: Cascade)
+
+  nombre     String
+  porcentaje Float
+}
+
+model CotizacionSimple {
+  id              String   @id @default(cuid())
+  numero          String   @unique
+  titulo          String   @default("COTIZACION")
+  fecha           DateTime @default(now())
+  estado          String   @default("borrador")
+  moneda          String   @default("USD")
+  tipoCambio      Float?
+
+  clienteEmpresa  String
+  clienteContacto String?
+
+  margen     Float   @default(0)
+  iva        Float   @default(21)
+  mostrarIva Boolean @default(false)
+  total      Float   @default(0)
+  profileSlot Int @default(1)
+
+  items       CotizacionSimpleItem[]
+  condiciones CotizacionSimpleCondicion[]
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CotizacionSimpleItem {
+  id                 String           @id @default(cuid())
+  cotizacionSimpleId String
+  cotizacion         CotizacionSimple @relation(fields: [cotizacionSimpleId], references: [id], onDelete: Cascade)
+
+  descripcion    String
+  notaSecundaria String?
+  cantidad       Float
+  precioUsd      Float
+  costoUsd       Float?
+  margenPct      Float?
+  subtotalUsd    Float
+  orden          Int    @default(0)
+}
+
+model CotizacionSimpleCondicion {
+  id                 String           @id @default(cuid())
+  cotizacionSimpleId String
+  cotizacion         CotizacionSimple @relation(fields: [cotizacionSimpleId], references: [id], onDelete: Cascade)
+
+  label  String
+  valor  String
+  orden  Int    @default(0)
+}
