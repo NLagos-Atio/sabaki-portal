@@ -37,13 +37,13 @@ export function LoginForm({
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-32 h-32 bg-[#1B2A4A] rounded-2xl mb-4 p-3">
-            {logoPath ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={logoPath} alt={displayName} className="w-full h-full object-contain" />
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src="/sabaki-logo.png" alt={displayName} className="w-full h-full object-contain" />
-            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={logoPath || "/sabaki-logo.png"}
+              alt={displayName}
+              className="w-full h-full object-contain"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/sabaki-logo.png"; }}
+            />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">{displayName}</h1>
           <p className="text-gray-700 text-sm mt-1">Portal de Cotizaciones</p>
