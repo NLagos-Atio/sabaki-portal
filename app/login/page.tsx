@@ -22,8 +22,7 @@ export default function LoginPage() {
     if (res?.error) {
       setError("Credenciales incorrectas. Verificá tu email y contraseña.");
     } else {
-      router.push("/cotizaciones");
-      router.refresh();
+      window.location.href = "/cotizaciones";
     }
   }
 
