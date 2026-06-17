@@ -212,7 +212,8 @@ export async function generateCotizacionDocx(cotizacion: Cotizacion, settings: S
   let logoRun: ImageRun | null = null;
   if (settings?.logoPath) {
     try {
-      const logoPath = join(process.cwd(), "public", settings.logoPath.replace(/^\//, ""));
+      const filename = settings.logoPath.split("/").pop()!;
+      const logoPath = join(process.cwd(), "public", "uploads", filename);
       const logoData = readFileSync(logoPath);
       const ext = settings.logoPath.split(".").pop()?.toLowerCase() || "png";
       logoRun = new ImageRun({
